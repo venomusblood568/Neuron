@@ -33,15 +33,41 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.LinkModel = exports.ContentModel = exports.UserModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 //connect th mongoose
 mongoose_1.default
     .connect("mongodb://localhost:27017/neuron")
     .then(() => console.log("Connected to MongoDB"))
     .catch((error) => console.error("MongoDB connection error:", error));
+//USER SCHEMA
 const UserSchema = new mongoose_1.Schema({
     username: { type: String, unique: true },
     password: String,
 });
 exports.UserModel = (0, mongoose_1.model)("User", UserSchema);
+//CONTENT SCHEMA
+const contentSchema = new mongoose_1.Schema({
+    title: String,
+    link: String,
+    tags: [{
+            type: mongoose_1.default.Types.ObjectId,
+            ref: "tag"
+        }],
+    userId: [{
+            type: mongoose_1.default.Types.ObjectId,
+            ref: "User",
+            required: true
+        }]
+});
+exports.ContentModel = (0, mongoose_1.model)('Content', contentSchema);
+//LINK SCHEMA
+const LinkSchema = new mongoose_1.Schema({
+    hash: {
+        type: mongoose_1.default.Types.ObjectId,
+        ref: "User",
+        required: true,
+        unique: true
+    },
+});
+exports.LinkModel = (0, mongoose_1.model)("Links", LinkSchema);
