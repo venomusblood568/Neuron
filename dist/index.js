@@ -105,21 +105,24 @@ app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awa
     }
 }));
 //Get Shared Content
-// app.get("/api/v1/brain/:shareLink", async (req, res) => {
-//   const hash = req.params.shareLink;
-//   const link = await LinkModel.findOne({ hash });
-//   if (!link) {
-//     res.status(404).json({ message: "Invalid share link" });
-//     return;
-//   }
-//   const content = await ContentModel.find({ userId: link.userId });
-//   const user = await UserModel.findOne({ _id: link.userId });
-//   if (!user) {
-//     res.status(404).json({ messgae: "User not found" });
-//     return;
-//   }
-//   res.status(200).json({ username: user.username, content });
-// });
+app.get("/api/v1/brain/:shareLink", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const hash = req.params.shareLink;
+    const link = yield db_1.LinkModel.findOne({ hash });
+    if (!link) {
+        res.status(404).json({ message: "Invaild share link" });
+        return;
+    }
+    const content = yield db_1.ContentModel.find({ userId: link.userId });
+    const user = yield db_1.UserModel.findOne({ _id: link.userId });
+    if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+    }
+    res.json({
+        username: user.username,
+        content
+    });
+}));
 app.listen(3000, () => {
     console.log(`Server is running on port 3000`);
 });

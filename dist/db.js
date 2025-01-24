@@ -63,7 +63,8 @@ const contentSchema = new mongoose_1.Schema({
 exports.ContentModel = (0, mongoose_1.model)('Content', contentSchema);
 //LINK SCHEMA
 const LinkSchema = new mongoose_1.Schema({
-    hash: {
+    hash: String,
+    userId: {
         type: mongoose_1.default.Types.ObjectId,
         ref: "User",
         required: true,

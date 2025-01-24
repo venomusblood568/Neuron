@@ -33,7 +33,8 @@ export const ContentModel = model('Content',contentSchema)
 
 //LINK SCHEMA
 const LinkSchema = new Schema({
-  hash:{ 
+  hash:String,
+  userId:{ 
     type: mongoose.Types.ObjectId, 
     ref: "User",
     required:true,
