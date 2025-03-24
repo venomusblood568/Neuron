@@ -18,6 +18,7 @@ export const UserModel = model("User", UserSchema);
 const contentSchema = new Schema({
   title:String,
   link:String,
+  type:String,
   tags:[{
     type:mongoose.Types.ObjectId,
     ref:"tag"
