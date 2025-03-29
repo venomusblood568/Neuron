@@ -50,7 +50,7 @@ app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.json({ token });
     }
     else {
-        res.send(403).json({
+        res.status(403).json({
             msg: "Incorrect credentials",
         });
     }

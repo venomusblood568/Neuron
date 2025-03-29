@@ -40,7 +40,7 @@ app.post("/api/v1/signin", async (req, res) => {
     );
     res.json({ token });
   } else {
-    res.send(403).json({
+    res.status(403).json({
       msg: "Incorrect credentials",
     });
   }
