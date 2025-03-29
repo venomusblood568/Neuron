@@ -75,8 +75,8 @@ app.get("/api/v1/content", userMiddleware, async (req, res) => {
 //delte the content
 app.delete("/api/v1/content", userMiddleware, async (req, res) => {
   const contentId = req.body.contentId;
-  await ContentModel.deleteMany({
-    contentId,
+  await ContentModel.deleteOne({
+    _id: contentId,
     userId: req.userId,
   });
   res.status(200).json({
