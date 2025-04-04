@@ -20,18 +20,35 @@ const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const cors_1 = __importDefault(require("cors"));
 const utils_1 = require("./utils");
+const zod_1 = require("zod");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
+// Zod Schemas
+const signupSchema = zod_1.z.object({
+    username: zod_1.z.string().min(3),
+    password: zod_1.z.string().min(6),
+});
+const signinSchema = zod_1.z.object({
+    username: zod_1.z.string().min(3),
+    password: zod_1.z.string().min(6),
+});
+const contentSchema = zod_1.z.object({
+    link: zod_1.z.string().url(),
+    type: zod_1.z.string().min(1),
+    title: zod_1.z.string().min(1),
+});
 //signup
 app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // TODO: Use zod
-    // TODO: Hash the password before storing it in the database.
-    const username = req.body.username;
-    const password = req.body.password;
+    const parsed = signupSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: parsed.error.issues.map((issue) => issue.message).join(", "),
+        });
+    }
+    const { username, password } = parsed.data;
     try {
         yield db_1.UserModel.create({ username, password });
-        console.log(`username: ${username} and password:${password}`);
         res.json({ message: "User signed up" });
     }
     catch (e) {
@@ -40,29 +57,35 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
 }));
 //signin
 app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const username = req.body.username;
-    const password = req.body.password;
+    const parsed = signinSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: parsed.error.issues.map((issue) => issue.message).join(", "),
+        });
+    }
+    const { username, password } = parsed.data;
     const existingUser = yield db_1.UserModel.findOne({ username, password });
     if (existingUser) {
-        const token = jsonwebtoken_1.default.sign({
-            id: existingUser._id,
-        }, config_1.JWT_SECRET);
+        const token = jsonwebtoken_1.default.sign({ id: existingUser._id }, config_1.JWT_SECRET);
         res.json({ token });
     }
     else {
-        res.status(403).json({
-            msg: "Incorrect credentials",
-        });
+        res.status(403).json({ msg: "Incorrect credentials" });
     }
 }));
 //add content
 app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const link = req.body.link;
-    const type = req.body.type;
+    const parsed = contentSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: parsed.error.issues.map((issue) => issue.message).join(", "),
+        });
+    }
+    const { link, type, title } = parsed.data;
     yield db_1.ContentModel.create({
         link,
         type,
-        title: req.body.title,
+        title,
         userId: req.userId,
         tags: [],
     });
