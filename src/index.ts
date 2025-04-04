@@ -6,39 +6,21 @@ import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
 import cors from "cors";
 import { random } from "./utils";
-import {z} from "zod"
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Zod Schemas
-const signupSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-});
-
-const signinSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-});
-
-const contentSchema = z.object({
-  link: z.string().url(),
-  type: z.string().min(1),
-  title: z.string().min(1),
-});
 //signup
 app.post("/api/v1/signup", async (req, res) => {
-  const parsed = signupSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({
-      message: parsed.error.issues.map((issue) => issue.message).join(", "),
-    });
-  }
-  const { username, password } = parsed.data;
+  // TODO: Use zod
+  // TODO: Hash the password before storing it in the database.
+  const username = req.body.username;
+  const password = req.body.password;
 
   try {
     await UserModel.create({ username, password });
+    console.log(`username: ${username} and password:${password}`);
     res.json({ message: "User signed up" });
   } catch (e) {
     res.status(409).json({ message: "User already exists" });
@@ -47,37 +29,34 @@ app.post("/api/v1/signup", async (req, res) => {
 
 //signin
 app.post("/api/v1/signin", async (req, res) => {
-  const parsed = signinSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({
-      message: parsed.error.issues.map((issue) => issue.message).join(", "),
-    });
-  }
-  const { username, password } = parsed.data;
+  const username = req.body.username;
+  const password = req.body.password;
 
   const existingUser = await UserModel.findOne({ username, password });
   if (existingUser) {
-    const token = jwt.sign({ id: existingUser._id }, JWT_SECRET);
+    const token = jwt.sign(
+      {
+        id: existingUser._id,
+      },
+      JWT_SECRET
+    );
     res.json({ token });
   } else {
-    res.status(403).json({ msg: "Incorrect credentials" });
+    res.status(403).json({
+      msg: "Incorrect credentials",
+    });
   }
 });
 
 //add content
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
-  const parsed = contentSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({
-      message: parsed.error.issues.map((issue) => issue.message).join(", "),
-    });
-  }
-  const { link, type, title } = parsed.data;
+  const link = req.body.link;
+  const type = req.body.type;
 
   await ContentModel.create({
     link,
     type,
-    title,
+    title: req.body.title,
     userId: req.userId,
     tags: [],
   });
@@ -136,14 +115,14 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
   }
   const content = await ContentModel.find({ userId: link.userId });
   const user = await UserModel.findOne({ _id: link.userId });
-  if(!user){
-    res.status(404).json({message:"User not found"})
-    return
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
   }
   res.json({
-    username:user.username,
-    content
-  })
+    username: user.username,
+    content,
+  });
 });
 
 app.listen(3000, () => {
