@@ -57,24 +57,22 @@ app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
 }));
 //add content
 app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const link = req.body.link;
-    const type = req.body.type;
+    const { link, type, title, tag } = req.body;
     yield db_1.ContentModel.create({
         link,
         type,
-        title: req.body.title,
+        title,
+        tag,
         userId: req.userId,
-        tags: [],
     });
     res.json({ message: "Content added" });
 }));
 //now get the content
 app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = req.userId;
-    const content = yield db_1.ContentModel.find({ userId: userId }).populate("userId", "username");
-    res.status(200).json({
-        content,
-    });
+    const content = yield db_1.ContentModel.find({ userId: req.userId })
+        .select("link type title tag createdAt")
+        .populate("userId", "username");
+    res.status(200).json({ content });
 }));
 //delte the content
 app.delete("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -113,7 +111,8 @@ app.get("/api/v1/brain/:shareLink", (req, res) => __awaiter(void 0, void 0, void
         res.status(404).json({ message: "Invaild share link" });
         return;
     }
-    const content = yield db_1.ContentModel.find({ userId: link.userId });
+    const content = yield db_1.ContentModel.find({ userId: link.userId }).select("link type title tag createdAt");
+    ;
     const user = yield db_1.UserModel.findOne({ _id: link.userId });
     if (!user) {
         res.status(404).json({ message: "User not found" });

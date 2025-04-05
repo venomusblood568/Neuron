@@ -16,18 +16,17 @@ export const UserModel = model("User", UserSchema);
 
 //CONTENT SCHEMA
 const contentSchema = new Schema({
-  title:String,
-  link:String,
-  type:String,
-  tags:[{
-    type:mongoose.Types.ObjectId,
-    ref:"tag"
-  }],
-  userId:[{
-    type:mongoose.Types.ObjectId,
-    ref:"User",
-    required:true
-  }]
+  title: String,
+  link: String,
+  type: String,
+  tag: String,
+  userId: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
 });
 
 export const ContentModel = model('Content',contentSchema)

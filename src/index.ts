@@ -50,29 +50,25 @@ app.post("/api/v1/signin", async (req, res) => {
 
 //add content
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
-  const link = req.body.link;
-  const type = req.body.type;
+   const { link, type, title, tag } = req.body;
 
   await ContentModel.create({
     link,
     type,
-    title: req.body.title,
+    title,
+    tag,
     userId: req.userId,
-    tags: [],
   });
   res.json({ message: "Content added" });
 });
 
 //now get the content
 app.get("/api/v1/content", userMiddleware, async (req, res) => {
-  const userId = req.userId;
-  const content = await ContentModel.find({ userId: userId }).populate(
-    "userId",
-    "username"
-  );
-  res.status(200).json({
-    content,
-  });
+  const content = await ContentModel.find({ userId: req.userId })
+    .select("link type title tag createdAt")
+    .populate("userId", "username");
+
+  res.status(200).json({ content });
 });
 
 //delte the content
@@ -113,7 +109,9 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
     res.status(404).json({ message: "Invaild share link" });
     return;
   }
-  const content = await ContentModel.find({ userId: link.userId });
+  const content = await ContentModel.find({ userId: link.userId }).select(
+    "link type title tag createdAt"
+  );;
   const user = await UserModel.findOne({ _id: link.userId });
   if (!user) {
     res.status(404).json({ message: "User not found" });
