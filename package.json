@@ -4,7 +4,7 @@
   "description": "Think. Store. Grow.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc --project tsconfig.json --traceResolution",
     "start": "node dist/index.js",
     "dev": "npm run build && npm run start"
   },

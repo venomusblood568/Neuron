@@ -1,5 +1,15 @@
 {
   "compilerOptions": {
-    "skipLibCheck": true
-  }
+    "target": "es6",
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "strict": true,
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "moduleResolution": "node" 
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
