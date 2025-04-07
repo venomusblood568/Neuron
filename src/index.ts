@@ -6,13 +6,13 @@ import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
 import cors from "cors";
 import { random } from "./utils";
-
+import { Request, Response } from "express";
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 //signup
-app.post("/api/v1/signup", async (req, res) => {
+app.post("/api/v1/signup", async (req: Request, res: Response) => {
   // TODO: Use zod
   // TODO: Hash the password before storing it in the database.
   const username = req.body.username;
@@ -28,7 +28,7 @@ app.post("/api/v1/signup", async (req, res) => {
 });
 
 //signin
-app.post("/api/v1/signin", async (req, res) => {
+app.post("/api/v1/signin", async (req: Request, res: Response) => {
   const username = req.body.username;
   const password = req.body.password;
 
@@ -49,60 +49,76 @@ app.post("/api/v1/signin", async (req, res) => {
 });
 
 //add content
-app.post("/api/v1/content", userMiddleware, async (req, res) => {
-   const { link, type, title, tag } = req.body;
+app.post(
+  "/api/v1/content",
+  userMiddleware,
+  async (req: Request, res: Response) => {
+    const { link, type, title, tag } = req.body;
 
-  await ContentModel.create({
-    link,
-    type,
-    title,
-    tag,
-    userId: req.userId,
-  });
-  res.json({ message: "Content added" });
-});
+    await ContentModel.create({
+      link,
+      type,
+      title,
+      tag,
+      userId: req.userId,
+    });
+    res.json({ message: "Content added" });
+  }
+);
 
 //now get the content
-app.get("/api/v1/content", userMiddleware, async (req, res) => {
-  const content = await ContentModel.find({ userId: req.userId })
-    .select("link type title tag createdAt")
-    .populate("userId", "username");
+app.get(
+  "/api/v1/content",
+  userMiddleware,
+  async (req: Request, res: Response) => {
+    const content = await ContentModel.find({ userId: req.userId })
+      .select("link type title tag createdAt")
+      .populate("userId", "username");
 
-  res.status(200).json({ content });
-});
+    res.status(200).json({ content });
+  }
+);
 
 //delte the content
-app.delete("/api/v1/content", userMiddleware, async (req, res) => {
-  const contentId = req.body.contentId;
-  await ContentModel.deleteOne({
-    _id: contentId,
-    userId: req.userId,
-  });
-  res.status(200).json({
-    msg: "Deleted",
-  });
-});
+app.delete(
+  "/api/v1/content",
+  userMiddleware,
+  async (req: Request, res: Response) => {
+    const contentId = req.body.contentId;
+    await ContentModel.deleteOne({
+      _id: contentId,
+      userId: req.userId,
+    });
+    res.status(200).json({
+      msg: "Deleted",
+    });
+  }
+);
 
 //Share Content Link
-app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
-  const { share } = req.body;
-  if (share) {
-    const existingUser = await LinkModel.findOne({ userId: req.userId });
-    if (existingUser) {
-      res.status(200).json({ hash: existingUser.hash });
-      return;
+app.post(
+  "/api/v1/brain/share",
+  userMiddleware,
+  async (req: Request, res: Response) => {
+    const { share } = req.body;
+    if (share) {
+      const existingUser = await LinkModel.findOne({ userId: req.userId });
+      if (existingUser) {
+        res.status(200).json({ hash: existingUser.hash });
+        return;
+      }
+      const hash = random(10);
+      await LinkModel.create({ userId: req.userId, hash });
+      res.status(200).json({ hash });
+    } else {
+      await LinkModel.deleteOne({ userId: req.userId });
+      res.status(200).json({ message: "Removed Link" });
     }
-    const hash = random(10);
-    await LinkModel.create({ userId: req.userId, hash });
-    res.status(200).json({ hash });
-  } else {
-    await LinkModel.deleteOne({ userId: req.userId });
-    res.status(200).json({ message: "Removed Link" });
   }
-});
+);
 
 //Get Shared Content
-app.get("/api/v1/brain/:shareLink", async (req, res) => {
+app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   const hash = req.params.shareLink;
   const link = await LinkModel.findOne({ hash });
   if (!link) {
@@ -111,7 +127,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
   }
   const content = await ContentModel.find({ userId: link.userId }).select(
     "link type title tag createdAt"
-  );;
+  );
   const user = await UserModel.findOne({ _id: link.userId });
   if (!user) {
     res.status(404).json({ message: "User not found" });

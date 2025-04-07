@@ -112,7 +112,6 @@ app.get("/api/v1/brain/:shareLink", (req, res) => __awaiter(void 0, void 0, void
         return;
     }
     const content = yield db_1.ContentModel.find({ userId: link.userId }).select("link type title tag createdAt");
-    ;
     const user = yield db_1.UserModel.findOne({ _id: link.userId });
     if (!user) {
         res.status(404).json({ message: "User not found" });
