@@ -6,10 +6,10 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "strict": true,
-    "types": ["node"],
-    "resolveJsonModule": true,
-    "moduleResolution": "node" 
+    "moduleResolution": "node", // Critical for resolving types
+    "types": ["node"], // Explicitly include Node types
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"], // Explicitly include source files
   "exclude": ["node_modules"]
 }
