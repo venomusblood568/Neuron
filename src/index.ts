@@ -13,6 +13,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+//testing the backend
+app.get("/api/v1/ping", async(req:Request, res:Response) =>{
+  res.status(200).json({message:"pong"});
+})
+
 //signup
 app.post("/api/v1/signup", async (req: Request, res: Response) => {
   // TODO: Use zod
