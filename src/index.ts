@@ -7,6 +7,8 @@ import { userMiddleware } from "./middleware";
 import cors from "cors";
 import { random } from "./utils";
 import { Request, Response } from "express";
+
+const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -139,6 +141,6 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log(`Server is running on port 3000`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
